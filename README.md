@@ -62,6 +62,15 @@ Open http://127.0.0.1:3000 on the Mac:
 
 Done. Open your usual websites.
 
+## Away from home
+With the local setup you don't need to change anything on the iPhone: the DNS setting is saved only for your home Wi-Fi.
+
+| Where you are | What happens |
+|---|---|
+| Home, Mac awake and Docker running | Ads filtered |
+| Mobile data or another Wi-Fi | Normal internet, no filter |
+| Home, Mac asleep or off | **No internet** on that Wi-Fi: set DNS to Automatic or wake the Mac |
+
 ## Problems?
 | Problem | Solution |
 |---|---|
@@ -72,7 +81,10 @@ Done. Open your usual websites.
 
 To stop it, set the iPhone back to **Automatic**, then run `docker compose down`.
 
+## Use it anywhere
+To run it on a small paid server instead of your Mac, see [docs/vps.md](docs/vps.md).
+
 ## Stay safe
-- Never open this to the internet; it is meant for your home network only.
+- Never expose port 53 or the admin panel to the internet. The local setup is for your home network only; for a server follow [docs/vps.md](docs/vps.md).
 - Never share the `data/` folder: it contains your browsing history.
 - Keep AdGuard Home updated.
