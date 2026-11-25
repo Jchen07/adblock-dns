@@ -1,92 +1,78 @@
 # adblock-dns
 
-Self-hosted DNS ad blocker using [AdGuard Home](https://github.com/AdguardTeam/AdGuardHome) in Docker, so Chrome on iPhone (which has no extensions) loads fewer web ads.
+**Browse on your iPhone without being buried in ads.**
 
-Current state: **local test** on a Mac, home Wi-Fi only.
+Chrome on iPhone doesn't allow ad-blocking extensions. This project blocks ads one step earlier, using your own computer.
 
-```
-iPhone -> AdGuard Home (blocks ad domains) -> Quad9 over HTTPS -> internet
-```
+## Why use it
+- **Fewer ads and pop-ups** on websites
+- **Fewer redirects** to shops and apps you never asked for
+- **Works in Chrome and many apps**, nothing to install on the iPhone
+- **Less tracking** and protection against known dangerous sites
+- **Free**, and you control it
 
-## What it does and does not do
-| Blocks | Does not block |
+> It won't remove everything: YouTube and social media ads still show, and some empty spaces may remain. For now it only works at home.
+
+## Where it works
+| Where | Blocks ads? |
 |---|---|
-| Banners from ad networks, trackers, many redirect domains | YouTube and in-feed ads (same domain as the content) |
-| Known malware/phishing domains (via Quad9) | Empty ad slots (DNS cannot edit pages) |
+| Chrome, Safari, Firefox, Edge | Yes |
+| Browsers with their own VPN or DNS turned on | No, they skip the filter |
+| Games using ad networks | Often (banners and videos between matches) |
+| In-game store offers | No, they come from the game itself |
+| YouTube, Instagram, TikTok | Generally no |
 
-It does not make you anonymous: the upstream DNS sees your non-blocked queries, and your ISP still sees where you connect.
+**Gamers:** "watch an ad for a reward" may stop working, so you would not get the reward. Switch DNS to **Automatic** for a moment, or unblock the address in **Query log**.
 
-## Requirements
-- Mac with Docker Desktop (tested setup: macOS). Other OSes need different commands to find the IP.
-- iPhone on the same Wi-Fi.
+## How it works
+Your computer checks every address your iPhone asks for. If it belongs to an ad network, it gets blocked. It uses [AdGuard Home](https://github.com/AdguardTeam/AdGuardHome).
 
-## 1. Run
+## Setup
+You need a Mac with Docker Desktop and an iPhone on the same Wi-Fi.
+
+### 1. Start it
+Find your Mac's IP:
 ```sh
-cp .env.example .env     # set LAN_IP to the output of: ipconfig getifaddr en0
+ipconfig getifaddr en0
+```
+Then create the settings file, write that IP in `.env`, and start:
+```sh
+cp .env.example .env
 docker compose up -d
 ```
-Ports: DNS (53) listens only on `LAN_IP`; the admin panel (3000) only on `127.0.0.1`.
 
-## 2. Setup wizard: http://127.0.0.1:3000
-1. Admin web interface: all interfaces, port **3000**. The default is 80, which is not published, so the panel would be unreachable.
-2. DNS server: all interfaces, port **53**.
-3. Create a user and a strong password. Keep them in a password manager, never in this repo.
-4. The "configure your devices" page is informational: click Next.
+### 2. First setup
+Open http://127.0.0.1:3000 on the Mac:
+- Change the web interface port from 80 to **3000**
+- Keep the DNS port at **53**
+- Create a user and a strong password
+- On the "configure your devices" page, just click Next
 
-The addresses with `172.x` shown by the wizard are internal container IPs.
+### 3. Recommended settings
+- **Settings > DNS settings:** replace the upstream server with `https://dns.quad9.net/dns-query`
+- **Settings > General:** keep query logs for **24 hours**
+- **Filters > DNS blocklists:** Add blocklist > Choose from the list > **HaGeZi's Pro Blocklist**
 
-## 3. Settings in the panel
-| Where | Setting |
+### 4. Connect the iPhone
+1. **Settings > Wi-Fi**, tap **(i)** next to your network
+2. **Configure DNS > Manual**
+3. Delete all servers, add your Mac's IP, **Save**
+4. Turn off "Limit IP Address Tracking", iCloud Private Relay and any VPN
+5. Turn airplane mode on and off
+
+Done. Open your usual websites.
+
+## Problems?
+| Problem | Solution |
 |---|---|
-| Settings > DNS settings > Upstream DNS | `https://dns.quad9.net/dns-query` (replace the default; `dns10` does not block malware). Test, then Apply |
-| Settings > General > Query log rotation | 24 hours |
-| Settings > General | "Browsing security" and "Parental control" off |
-| Filters > DNS blocklists | Keep **AdGuard DNS filter**; Add blocklist > Choose from the list > **HaGeZi's Pro Blocklist** |
-| Filters > Custom filtering rules | Optional, one per line: `\|\|example-ad-domain.com^` |
+| iPhone has no internet | Check the Mac is awake and Docker is running. To undo: **Configure DNS > Automatic** |
+| Mac's IP changed | Update `.env`, run `docker compose up -d`, update the iPhone |
+| A website stopped working | In the panel, open **Query log** and unblock the address |
+| Some ads still appear | In the panel, find the address in **Query log** and block it |
 
-If the list is not in the picker, add it by URL: `https://adguardteam.github.io/HostlistsRegistry/assets/filter_48.txt`.
+To stop it, set the iPhone back to **Automatic**, then run `docker compose down`.
 
-## 4. Check from the Mac
-```sh
-dig @<LAN_IP> example.com +short       # real IP
-dig @<LAN_IP> doubleclick.net +short   # 0.0.0.0 = blocked
-```
-
-## 5. iPhone
-1. Settings > Wi-Fi > (i) on the home network > Configure DNS > **Manual**.
-2. Remove **all** existing servers, add `<LAN_IP>`, Save.
-3. On that network turn off "Limit IP Address Tracking" and iCloud Private Relay, and any VPN.
-4. In Chrome: Settings > Content settings > Block pop-ups.
-5. Toggle airplane mode to flush the DNS cache.
-
-**Revert:** Configure DNS > Automatic.
-
-## Keep the Mac's IP stable (optional)
-- macOS: Wi-Fi > Details > Private Wi-Fi address > **Fixed**.
-- Router: add a DHCP reservation for the Mac.
-
-If the IP changes: update `.env`, run `docker compose up -d`, and update the iPhone.
-
-## Troubleshooting
-| Symptom | Fix |
-|---|---|
-| iPhone has no internet at home | Mac asleep, Docker stopped or IP changed. Set DNS to Automatic to recover |
-| A site or app breaks | Query log > find the blocked domain > Unblock, or disable HaGeZi |
-| Ads or redirects still appear | Check the query log for the new domain and add a custom rule. Ad networks rotate domains |
-
-## Operations
-```sh
-docker compose logs -f
-docker compose down      # set the iPhone DNS back to Automatic first
-```
-Update: change the image tag in `docker-compose.yml`, then `docker compose pull && docker compose up -d`. Check AdGuard Home's security advisories.
-
-## Security
-- Never expose port 53 or the panel to the internet: open resolvers get abused.
-- `data/` holds the password hash and your browsing history. `data/`, `.env` and `local-notes.md` are git-ignored.
-
-## Roadmap
-1. Local test (current)
-2. Measure for a few days
-3. VPS with encrypted DNS and an iPhone profile
-4. Hardening: access limits, Unbound, updates, alerts
+## Stay safe
+- Never open this to the internet; it is meant for your home network only.
+- Never share the `data/` folder: it contains your browsing history.
+- Keep AdGuard Home updated.
