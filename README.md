@@ -62,6 +62,23 @@ Open http://127.0.0.1:3000 on the Mac:
 
 Done. Open your usual websites.
 
+## Shortcuts (optional)
+Turn the blocker on and off with one word. In the repo folder, run this once:
+```sh
+echo "source \"$PWD/shell/aliases.zsh\"" >> ~/.zshrc
+source ~/.zshrc
+```
+
+| Command | What it does |
+|---|---|
+| `adblock-on` | Opens Docker if needed, starts the blocker, shows your Mac's IP |
+| `adblock-off` | Stops the blocker. Your settings are kept |
+| `adblock-status` | Shows if it is running (no output means off) |
+
+Order matters: **when turning off**, first set the iPhone DNS to **Automatic**, then run `adblock-off`. **When turning on**, run `adblock-on`, then set the iPhone to **Manual**.
+
+Do the [Setup](#setup) first. If you move the repo folder, update the line in `~/.zshrc`.
+
 ## Away from home
 With the local setup you don't need to change anything on the iPhone: the DNS setting is saved only for your home Wi-Fi.
 
