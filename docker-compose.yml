@@ -1,0 +1,14 @@
+services:
+  adguardhome:
+    image: adguard/adguardhome:v1.0.0
+    container_name: adguardhome
+    restart: unless-stopped
+    ports:
+      # DNS only on the home network address
+      - "${LAN_IP:?set LAN_IP in .env}:53:53/tcp"
+      - "${LAN_IP:?set LAN_IP in .env}:53:53/udp"
+      # Admin panel only reachable from this Mac
+      - "127.0.0.1:3000:3000/tcp"
+    volumes:
+      - ./data/work:/opt/adguardhome/work
+      - ./data/conf:/opt/adguardhome/conf
