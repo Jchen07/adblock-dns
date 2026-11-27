@@ -1,0 +1,4 @@
+# Extra rules that adblock-setup adds to your own (Filters > Custom filtering rules).
+# AdGuard syntax, one per line. Lines starting with # are ignored.
+# Found an ad or redirect address in Query log? Add it here as ||address^
+||redirect-media.com^

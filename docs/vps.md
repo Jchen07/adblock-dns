@@ -1,6 +1,6 @@
 # Run it on a paid server (VPS)
 
-So it works anywhere and your Mac doesn't need to stay on.
+So it works anywhere and no computer at home needs to stay on.
 
 > Status: written plan, **not tested yet**.
 
@@ -10,7 +10,7 @@ You    --SSH tunnel--> admin panel
 ```
 
 ## First, the basics
-**What is a VPS?** A computer rented in a data center, always on, with its own public IP. You control it from the terminal (SSH). It replaces your Mac running Docker.
+**What is a VPS?** A computer rented in a data center, always on, with its own public IP. You control it from the terminal (SSH). It replaces the computer at home running Docker.
 
 **Do I need a domain?** You need a name pointing to the server so it can get an HTTPS certificate. It doesn't have to be paid.
 
@@ -148,6 +148,8 @@ curl -s -o /dev/null -w '%{http_code}\n' "https://dns.yourdomain.com/"          
 Repeat the first command with a made-up ID: it must **not** resolve (check the query log).
 
 ## 8. iPhone profile
+> Android: its **Private DNS** setting uses DNS-over-TLS (port 853), which this setup doesn't offer yet. Not covered here.
+
 1. With the tunnel open and logged in, download:
    `http://127.0.0.1:3000/apple/doh.mobileconfig?host=dns.yourdomain.com&client_id=YOUR_ID`
 2. AirDrop the file to the iPhone. It contains your secret ID: don't share or commit it.

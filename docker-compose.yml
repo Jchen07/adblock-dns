@@ -7,7 +7,7 @@ services:
       # DNS only on the home network address
       - "${LAN_IP:?set LAN_IP in .env}:53:53/tcp"
       - "${LAN_IP:?set LAN_IP in .env}:53:53/udp"
-      # Admin panel only reachable from this Mac
+      # Admin panel only reachable from this computer
       - "127.0.0.1:3000:3000/tcp"
     volumes:
       - ./data/work:/opt/adguardhome/work
